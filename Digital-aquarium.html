@@ -1,0 +1,1274 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2867
+\cocoatextscaling1\cocoaplatform1{\fonttbl\f0\fnil\fcharset0 .SFUI-Regular;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+
+\f0\fs32 \cf0 <!DOCTYPE html>\
+<html lang="ko">\
+<head>\
+  <meta charset="UTF-8" />\
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />\
+  <title>AquaPure: Pocket Ocean - Enhanced</title>\
+  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>\
+  <style>\
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');\
+\
+    * \{\
+      margin: 0;\
+      padding: 0;\
+      box-sizing: border-box;\
+    \}\
+\
+    body \{\
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;\
+      overflow: hidden;\
+      background-color: #001e26;\
+      touch-action: none;\
+      -webkit-tap-highlight-color: transparent;\
+    \}\
+\
+    #canvas-container \{\
+      width: 100vw;\
+      height: 100vh;\
+      position: absolute;\
+      top: 0;\
+      left: 0;\
+      z-index: 0;\
+    \}\
+\
+    .glass-panel \{\
+      background: rgba(255, 255, 255, 0.1);\
+      backdrop-filter: blur(12px);\
+      -webkit-backdrop-filter: blur(12px);\
+      border: 1px solid rgba(255, 255, 255, 0.2);\
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);\
+    \}\
+\
+    .action-btn \{\
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);\
+      cursor: pointer;\
+      background: transparent;\
+      border: none;\
+      color: white;\
+    \}\
+\
+    .action-btn:active \{\
+      transform: scale(0.95);\
+      background: rgba(255, 255, 255, 0.3);\
+    \}\
+\
+    #loader \{\
+      position: fixed;\
+      inset: 0;\
+      background: #001e26;\
+      z-index: 50;\
+      display: flex;\
+      justify-content: center;\
+      align-items: center;\
+      flex-direction: column;\
+      transition: opacity 0.5s;\
+    \}\
+\
+    .bubble \{\
+      width: 15px;\
+      height: 15px;\
+      background: rgba(255, 255, 255, 0.8);\
+      border-radius: 50%;\
+      animation: rise 1s infinite ease-in;\
+      margin: 5px;\
+    \}\
+\
+    @keyframes rise \{\
+      0% \{ transform: translateY(0); opacity: 0; \}\
+      50% \{ opacity: 1; \}\
+      100% \{ transform: translateY(-20px); opacity: 0; \}\
+    \}\
+\
+    .hud \{\
+      position: absolute;\
+      top: 0;\
+      left: 0;\
+      width: 100%;\
+      padding: 1rem;\
+      z-index: 10;\
+      display: flex;\
+      justify-content: space-between;\
+      align-items: flex-start;\
+      pointer-events: none;\
+    \}\
+\
+    .hud-buttons \{\
+      pointer-events: auto;\
+      display: flex;\
+      gap: 0.5rem;\
+    \}\
+\
+    .hud-button \{\
+      width: 2.5rem;\
+      height: 2.5rem;\
+      border-radius: 50%;\
+      display: flex;\
+      align-items: center;\
+      justify-content: center;\
+      cursor: pointer;\
+      border: none;\
+      color: white;\
+    \}\
+\
+    #hint \{\
+      position: absolute;\
+      top: 50%;\
+      left: 50%;\
+      transform: translate(-50%, -50%);\
+      pointer-events: none;\
+      text-align: center;\
+      opacity: 0;\
+      transition: opacity 1s;\
+      z-index: 0;\
+      color: #7dd3fc;\
+      font-size: 0.875rem;\
+      letter-spacing: 0.1em;\
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);\
+    \}\
+\
+    .dock \{\
+      position: absolute;\
+      bottom: 1.5rem;\
+      left: 1rem;\
+      right: 1rem;\
+      z-index: 20;\
+    \}\
+\
+    .dock-panel \{\
+      border-radius: 1rem;\
+      padding: 0.5rem;\
+      display: flex;\
+      justify-content: space-around;\
+      align-items: center;\
+      height: 5rem;\
+    \}\
+\
+    .dock-btn \{\
+      display: flex;\
+      flex-direction: column;\
+      align-items: center;\
+      justify-content: center;\
+      width: 4rem;\
+      height: 100%;\
+      border-radius: 0.75rem;\
+    \}\
+\
+    .dock-btn.clear \{\
+      background: rgba(239, 68, 68, 0.2);\
+      color: #fca5a5;\
+    \}\
+\
+    .dock-icon \{\
+      font-size: 1.5rem;\
+      margin-bottom: 0.25rem;\
+    \}\
+\
+    .dock-label \{\
+      font-size: 0.625rem;\
+      color: #a5f3fc;\
+    \}\
+\
+    .dock-btn.clear .dock-label \{\
+      color: #fca5a5;\
+    \}\
+  </style>\
+</head>\
+\
+<body>\
+  <div id="loader">\
+    <div style="display: flex;">\
+      <div class="bubble" style="animation-delay: 0s"></div>\
+      <div class="bubble" style="animation-delay: 0.2s"></div>\
+      <div class="bubble" style="animation-delay: 0.4s"></div>\
+    </div>\
+    <p style="margin-top: 1rem; font-size: 0.875rem; letter-spacing: 0.1em; color: #a5f3fc;">AQUA PURE ENHANCED</p>\
+  </div>\
+\
+  <div id="canvas-container"></div>\
+\
+  <div class="hud">\
+    <div>\
+      <h1 style="font-size: 1.5rem; font-weight: bold; color: #a5f3fc; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">AquaPure</h1>\
+      <p style="font-size: 0.75rem; color: #67e8f9; opacity: 0.8;">Enhanced Ocean</p>\
+    </div>\
+    <div class="hud-buttons">\
+      <button onclick="app.toggleLight()" class="glass-panel hud-button" style="color: #fef08a;">\uc0\u9728 </button>\
+      <button onclick="app.resetCamera()" class="glass-panel hud-button">\uc0\u10226 </button>\
+    </div>\
+  </div>\
+\
+  <div id="hint">\
+    <p>\uc0\u54868 \u47732 \u51012  \u53485 \u54616 \u50668  \u47673 \u51060 \u47484  \u51452 \u49464 \u50836 </p>\
+  </div>\
+\
+  <div class="dock">\
+    <div class="glass-panel dock-panel">\
+      <button onclick="app.spawnFish('tropical')" class="action-btn dock-btn">\
+        <div class="dock-icon">\uc0\u55357 \u56352 </div>\
+        <span class="dock-label">Tropical</span>\
+      </button>\
+\
+      <button onclick="app.spawnFish('neon')" class="action-btn dock-btn">\
+        <div class="dock-icon">\uc0\u55357 \u56351 </div>\
+        <span class="dock-label">Neon</span>\
+      </button>\
+\
+      <button onclick="app.spawnJellyfish()" class="action-btn dock-btn">\
+        <div class="dock-icon">\uc0\u55358 \u57020 </div>\
+        <span class="dock-label">Jellyfish</span>\
+      </button>\
+\
+      <button onclick="app.spawnCoral()" class="action-btn dock-btn">\
+        <div class="dock-icon">\uc0\u55358 \u57016 </div>\
+        <span class="dock-label">Coral</span>\
+      </button>\
+\
+      <button onclick="app.spawnDiver()" class="action-btn dock-btn">\
+        <div class="dock-icon">\uc0\u55358 \u56639 </div>\
+        <span class="dock-label">Diver</span>\
+      </button>\
+\
+      <button onclick="app.clearScene()" class="action-btn dock-btn clear">\
+        <div class="dock-icon" style="font-size: 1.25rem;">\uc0\u10005 </div>\
+        <span class="dock-label">Clear</span>\
+      </button>\
+    </div>\
+  </div>\
+\
+  <script>\
+    class AquaPure \{\
+      constructor() \{\
+        this.container = document.getElementById('canvas-container');\
+        this.scene = null;\
+        this.camera = null;\
+        this.renderer = null;\
+        this.clock = new THREE.Clock();\
+\
+        this.fishList = [];\
+        this.jellyfishList = [];\
+        this.decorations = [];\
+        this.corals = [];\
+        this.divers = [];\
+        this.foods = [];\
+        this.bubbleEmitters = [];\
+\
+        this.boidConfig = \{\
+          separation: 1.0,\
+          alignment: 0.7,\
+          cohesion: 0.5,\
+          speed: 2.5,\
+          perception: 5\
+        \};\
+\
+        this.raycaster = new THREE.Raycaster();\
+        this.mouse = new THREE.Vector2();\
+\
+        this.init();\
+        this.animate();\
+      \}\
+\
+      init() \{\
+        this.scene = new THREE.Scene();\
+        this.scene.background = new THREE.Color(0x001e26);\
+        this.scene.fog = new THREE.FogExp2(0x001e26, 0.03);\
+\
+        this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);\
+        this.camera.position.set(0, 5, 20);\
+        this.camera.lookAt(0, 0, 0);\
+\
+        this.renderer = new THREE.WebGLRenderer(\{ antialias: true, alpha: false \});\
+        this.renderer.setSize(window.innerWidth, window.innerHeight);\
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));\
+        this.renderer.shadowMap.enabled = true;\
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;\
+        this.container.appendChild(this.renderer.domElement);\
+\
+        this.setupLighting();\
+        this.createEnvironment();\
+\
+        for (let i = 0; i < 8; i++) this.spawnFish(Math.random() > 0.5 ? 'tropical' : 'neon');\
+        for (let i = 0; i < 3; i++) this.spawnJellyfish();\
+        for (let i = 0; i < 5; i++) this.spawnCoral();\
+        this.spawnTreasureChest();\
+        this.spawnSeahouse();\
+        this.spawnStarfish();\
+        this.spawnDiver();\
+\
+        window.addEventListener('resize', () => this.onWindowResize(), false);\
+        this.renderer.domElement.addEventListener('pointerdown', (e) => this.onPointerDown(e), false);\
+\
+        document.addEventListener('mousemove', (e) => \{\
+          const x = (e.clientX / window.innerWidth) * 2 - 1;\
+          const y = -(e.clientY / window.innerHeight) * 2 + 1;\
+          this.camera.position.x += (x * 2 - this.camera.position.x) * 0.05;\
+          this.camera.position.y += (5 + y * 2 - this.camera.position.y) * 0.05;\
+          this.camera.lookAt(0, 0, 0);\
+        \});\
+\
+        setTimeout(() => \{\
+          const loader = document.getElementById('loader');\
+          if (loader) loader.style.opacity = '0';\
+\
+          setTimeout(() => \{\
+            const loader2 = document.getElementById('loader');\
+            if (loader2) loader2.remove();\
+          \}, 500);\
+\
+          const hint = document.getElementById('hint');\
+          if (hint) hint.style.opacity = '0.7';\
+          setTimeout(() => \{ const h = document.getElementById('hint'); if (h) h.style.opacity = '0'; \}, 4000);\
+        \}, 1500);\
+      \}\
+\
+      setupLighting() \{\
+        this.sunLight = new THREE.DirectionalLight(0xaaddff, 1.2);\
+        this.sunLight.position.set(5, 20, 10);\
+        this.sunLight.castShadow = true;\
+        this.sunLight.shadow.mapSize.width = 1024;\
+        this.sunLight.shadow.mapSize.height = 1024;\
+        this.scene.add(this.sunLight);\
+\
+        this.ambientLight = new THREE.AmbientLight(0x004060, 0.6);\
+        this.scene.add(this.ambientLight);\
+\
+        const rimLight = new THREE.PointLight(0x00ffaa, 0.5, 20);\
+        rimLight.position.set(-10, 5, -5);\
+        this.scene.add(rimLight);\
+\
+        const colorLight1 = new THREE.PointLight(0xff00ff, 0.3, 15);\
+        colorLight1.position.set(8, 2, 5);\
+        this.scene.add(colorLight1);\
+\
+        const colorLight2 = new THREE.PointLight(0x00ffff, 0.3, 15);\
+        colorLight2.position.set(-8, 2, -5);\
+        this.scene.add(colorLight2);\
+      \}\
+\
+      toggleLight() \{\
+        if (this.sunLight.intensity > 0.5) \{\
+          this.sunLight.intensity = 0.2;\
+          this.sunLight.color.setHex(0x002244);\
+          this.ambientLight.intensity = 0.2;\
+        \} else \{\
+          this.sunLight.intensity = 1.2;\
+          this.sunLight.color.setHex(0xaaddff);\
+          this.ambientLight.intensity = 0.6;\
+        \}\
+      \}\
+\
+      createEnvironment() \{\
+        const planeGeometry = new THREE.PlaneGeometry(60, 60, 32, 32);\
+\
+        const canvas = document.createElement('canvas');\
+        canvas.width = 512;\
+        canvas.height = 512;\
+        const ctx = canvas.getContext('2d');\
+        ctx.fillStyle = '#dcb183';\
+        ctx.fillRect(0, 0, 512, 512);\
+        for (let i = 0; i < 50000; i++) \{\
+          ctx.fillStyle = Math.random() > 0.5 ? '#cba073' : '#e6c49c';\
+          ctx.fillRect(Math.random() * 512, Math.random() * 512, 2, 2);\
+        \}\
+        const sandTexture = new THREE.CanvasTexture(canvas);\
+\
+        const planeMaterial = new THREE.MeshStandardMaterial(\{\
+          map: sandTexture,\
+          roughness: 1,\
+          bumpScale: 0.5\
+        \});\
+\
+        const pos = planeGeometry.attributes.position;\
+        for (let i = 0; i < pos.count; i++) \{\
+          const z = pos.getZ(i);\
+          pos.setZ(i, z + Math.sin(pos.getX(i) * 0.2) * 0.5 + Math.cos(pos.getY(i) * 0.2) * 0.5);\
+        \}\
+        planeGeometry.computeVertexNormals();\
+\
+        const floor = new THREE.Mesh(planeGeometry, planeMaterial);\
+        floor.rotation.x = -Math.PI / 2;\
+        floor.position.y = -5;\
+        floor.receiveShadow = true;\
+        this.scene.add(floor);\
+\
+        const particlesGeom = new THREE.BufferGeometry();\
+        const particleCount = 500;\
+        const pPos = new Float32Array(particleCount * 3);\
+        for (let i = 0; i < particleCount * 3; i++) pPos[i] = (Math.random() - 0.5) * 50;\
+        particlesGeom.setAttribute('position', new THREE.BufferAttribute(pPos, 3));\
+\
+        const pMat = new THREE.PointsMaterial(\{\
+          color: 0xffffff,\
+          size: 0.08,\
+          transparent: true,\
+          opacity: 0.6\
+        \});\
+\
+        this.particles = new THREE.Points(particlesGeom, pMat);\
+        this.scene.add(this.particles);\
+\
+        for (let i = 0; i < 8; i++) this.spawnSeaweed();\
+      \}\
+\
+      spawnFish(type) \{\
+        const fish = new EnhancedFish(type);\
+        fish.mesh.position.set(\
+          (Math.random() - 0.5) * 12,\
+          (Math.random() - 0.5) * 6,\
+          (Math.random() - 0.5) * 10\
+        );\
+        this.scene.add(fish.mesh);\
+        this.fishList.push(fish);\
+      \}\
+\
+      spawnJellyfish() \{\
+        const jellyfish = new Jellyfish();\
+        jellyfish.mesh.position.set(\
+          (Math.random() - 0.5) * 10,\
+          Math.random() * 6 - 1,\
+          (Math.random() - 0.5) * 10\
+        );\
+        this.scene.add(jellyfish.mesh);\
+        this.jellyfishList.push(jellyfish);\
+      \}\
+\
+      spawnCoral() \{\
+        const coralType = Math.floor(Math.random() * 3);\
+        const coral = this.createCoral(coralType);\
+        const x = (Math.random() - 0.5) * 18;\
+        const z = (Math.random() - 0.5) * 12;\
+        coral.position.set(x, -5, z);\
+        coral.userData = \{\
+          phase: Math.random() * Math.PI * 2,\
+          speed: 0.3 + Math.random() * 0.5,\
+          type: 'coral'\
+        \};\
+        this.scene.add(coral);\
+        this.corals.push(coral);\
+      \}\
+\
+      createCoral(type) \{\
+        const group = new THREE.Group();\
+\
+        if (type === 0) \{\
+          const branches = 5 + Math.floor(Math.random() * 3);\
+          for (let i = 0; i < branches; i++) \{\
+            const height = 1 + Math.random() * 1.5;\
+            const geom = new THREE.CylinderGeometry(0.05, 0.08, height, 6);\
+            const mat = new THREE.MeshStandardMaterial(\{\
+              color: new THREE.Color().setHSL(0.05 + Math.random() * 0.1, 0.8, 0.6),\
+              roughness: 0.7\
+            \});\
+            const branch = new THREE.Mesh(geom, mat);\
+            branch.position.y = height / 2;\
+            branch.rotation.z = (Math.random() - 0.5) * 0.3;\
+            branch.position.x = (Math.random() - 0.5) * 0.3;\
+            branch.castShadow = true;\
+            group.add(branch);\
+          \}\
+        \} else if (type === 1) \{\
+          const geom = new THREE.ConeGeometry(0.8, 1.5, 8, 1, true);\
+          const mat = new THREE.MeshStandardMaterial(\{\
+            color: new THREE.Color().setHSL(0.9, 0.7, 0.5),\
+            side: THREE.DoubleSide,\
+            roughness: 0.8\
+          \});\
+          const fan = new THREE.Mesh(geom, mat);\
+          fan.position.y = 0.75;\
+          fan.castShadow = true;\
+          group.add(fan);\
+        \} else \{\
+          const count = 8 + Math.floor(Math.random() * 5);\
+          for (let i = 0; i < count; i++) \{\
+            const radius = 0.1 + Math.random() * 0.15;\
+            const geom = new THREE.SphereGeometry(radius, 8, 8);\
+            const mat = new THREE.MeshStandardMaterial(\{\
+              color: new THREE.Color().setHSL(0.55, 0.8, 0.6),\
+              roughness: 0.9\
+            \});\
+            const sphere = new THREE.Mesh(geom, mat);\
+            sphere.position.set(\
+              (Math.random() - 0.5) * 0.5,\
+              Math.random() * 0.8,\
+              (Math.random() - 0.5) * 0.5\
+            );\
+            sphere.castShadow = true;\
+            group.add(sphere);\
+          \}\
+        \}\
+\
+        return group;\
+      \}\
+\
+      spawnDiver() \{\
+        const diver = new Diver();\
+        diver.mesh.position.set(\
+          (Math.random() - 0.5) * 8,\
+          Math.random() * 4 - 1,\
+          (Math.random() - 0.5) * 8\
+        );\
+        this.scene.add(diver.mesh);\
+        this.divers.push(diver);\
+        this.createBubbleEmitter(diver.mesh);\
+      \}\
+\
+      spawnTreasureChest() \{\
+        const group = new THREE.Group();\
+\
+        const boxGeom = new THREE.BoxGeometry(0.8, 0.5, 0.6);\
+        const boxMat = new THREE.MeshStandardMaterial(\{\
+          color: 0x8B4513,\
+          roughness: 0.8\
+        \});\
+        const box = new THREE.Mesh(boxGeom, boxMat);\
+        group.add(box);\
+\
+        const lidGeom = new THREE.BoxGeometry(0.85, 0.1, 0.65);\
+        const lid = new THREE.Mesh(lidGeom, boxMat);\
+        lid.position.y = 0.3;\
+        group.add(lid);\
+\
+        const stripGeom = new THREE.BoxGeometry(0.9, 0.05, 0.1);\
+        const stripMat = new THREE.MeshStandardMaterial(\{\
+          color: 0xFFD700,\
+          metalness: 0.8,\
+          roughness: 0.2\
+        \});\
+        const strip1 = new THREE.Mesh(stripGeom, stripMat);\
+        strip1.position.z = 0.2;\
+        group.add(strip1);\
+        const strip2 = strip1.clone();\
+        strip2.position.z = -0.2;\
+        group.add(strip2);\
+\
+        group.position.set(\
+          (Math.random() - 0.5) * 15,\
+          -4.7,\
+          (Math.random() - 0.5) * 10\
+        );\
+        group.rotation.y = Math.random() * Math.PI * 2;\
+        group.castShadow = true;\
+\
+        group.userData = \{\
+          type: 'chest',\
+          lid: lid,\
+          initialLidY: lid.position.y,\
+          phase: Math.random() * Math.PI * 2\
+        \};\
+\
+        this.scene.add(group);\
+        this.decorations.push(group);\
+      \}\
+\
+      spawnSeahouse() \{\
+        const group = new THREE.Group();\
+\
+        const bodyGeom = new THREE.CylinderGeometry(0.6, 0.7, 1, 8);\
+        const bodyMat = new THREE.MeshStandardMaterial(\{\
+          color: 0xFFB6C1,\
+          roughness: 0.7\
+        \});\
+        const body = new THREE.Mesh(bodyGeom, bodyMat);\
+        body.position.y = 0.5;\
+        group.add(body);\
+\
+        const roofGeom = new THREE.ConeGeometry(0.8, 0.6, 8);\
+        const roofMat = new THREE.MeshStandardMaterial(\{\
+          color: 0xFF69B4,\
+          roughness: 0.8\
+        \});\
+        const roof = new THREE.Mesh(roofGeom, roofMat);\
+        roof.position.y = 1.3;\
+        group.add(roof);\
+\
+        const windowGeom = new THREE.CircleGeometry(0.15, 8);\
+        const windowMat = new THREE.MeshBasicMaterial(\{ color: 0x87CEEB \});\
+        const window1 = new THREE.Mesh(windowGeom, windowMat);\
+        window1.position.set(0.35, 0.6, 0.35);\
+        window1.rotation.y = -Math.PI / 4;\
+        group.add(window1);\
+\
+        const doorGeom = new THREE.BoxGeometry(0.25, 0.4, 0.05);\
+        const doorMat = new THREE.MeshStandardMaterial(\{ color: 0x8B4513 \});\
+        const door = new THREE.Mesh(doorGeom, doorMat);\
+        door.position.set(0, 0.2, 0.7);\
+        group.add(door);\
+\
+        group.position.set(\
+          (Math.random() - 0.5) * 12,\
+          -4.5,\
+          (Math.random() - 0.5) * 10\
+        );\
+        group.rotation.y = Math.random() * Math.PI * 2;\
+        group.castShadow = true;\
+\
+        this.scene.add(group);\
+        this.decorations.push(group);\
+      \}\
+\
+      spawnStarfish() \{\
+        const group = new THREE.Group();\
+        const arms = 5;\
+\
+        for (let i = 0; i < arms; i++) \{\
+          const angle = (i / arms) * Math.PI * 2;\
+          const armGeom = new THREE.ConeGeometry(0.15, 0.6, 5);\
+          const armMat = new THREE.MeshStandardMaterial(\{\
+            color: new THREE.Color().setHSL(0.05, 0.9, 0.5),\
+            roughness: 0.9\
+          \});\
+          const arm = new THREE.Mesh(armGeom, armMat);\
+          arm.rotation.z = Math.PI / 2;\
+          arm.position.x = Math.cos(angle) * 0.3;\
+          arm.position.z = Math.sin(angle) * 0.3;\
+          arm.rotation.y = angle;\
+          group.add(arm);\
+        \}\
+\
+        const centerGeom = new THREE.SphereGeometry(0.2, 8, 8);\
+        const centerMat = new THREE.MeshStandardMaterial(\{\
+          color: 0xFF6347,\
+          roughness: 0.9\
+        \});\
+        const center = new THREE.Mesh(centerGeom, centerMat);\
+        group.add(center);\
+\
+        group.position.set(\
+          (Math.random() - 0.5) * 15,\
+          -4.8,\
+          (Math.random() - 0.5) * 10\
+        );\
+        group.rotation.x = -Math.PI / 2;\
+        group.rotation.z = Math.random() * Math.PI * 2;\
+        group.castShadow = true;\
+\
+        this.scene.add(group);\
+        this.decorations.push(group);\
+      \}\
+\
+      spawnSeaweed() \{\
+        const height = 2 + Math.random() * 2.5;\
+        const geometry = new THREE.ConeGeometry(0.15, height, 5, 8, true);\
+        geometry.translate(0, height / 2, 0);\
+\
+        const material = new THREE.MeshLambertMaterial(\{\
+          color: new THREE.Color().setHSL(0.3, 0.7, 0.4),\
+          side: THREE.DoubleSide\
+        \});\
+\
+        const plant = new THREE.Mesh(geometry, material);\
+\
+        const x = (Math.random() - 0.5) * 20;\
+        const z = (Math.random() - 0.5) * 12;\
+        plant.position.set(x, -5, z);\
+\
+        plant.userData = \{\
+          phase: Math.random() * Math.PI * 2,\
+          speed: 0.5 + Math.random() * 1.0,\
+          type: 'seaweed'\
+        \};\
+\
+        plant.castShadow = true;\
+        this.scene.add(plant);\
+        this.decorations.push(plant);\
+      \}\
+\
+      createBubbleEmitter(parentMesh) \{\
+        this.bubbleEmitters.push(\{\
+          parent: parentMesh,\
+          bubbles: [],\
+          timer: 0\
+        \});\
+      \}\
+\
+      updateBubbles(delta) \{\
+        this.bubbleEmitters.forEach(emitter => \{\
+          emitter.timer += delta;\
+\
+          if (emitter.timer > 0.3) \{\
+            emitter.timer = 0;\
+\
+            const bubbleGeom = new THREE.SphereGeometry(0.05 + Math.random() * 0.05, 6, 6);\
+            const bubbleMat = new THREE.MeshBasicMaterial(\{\
+              color: 0xffffff,\
+              transparent: true,\
+              opacity: 0.6\
+            \});\
+            const bubble = new THREE.Mesh(bubbleGeom, bubbleMat);\
+\
+            bubble.position.copy(emitter.parent.position);\
+            bubble.position.y += 0.3;\
+            bubble.position.x += (Math.random() - 0.5) * 0.2;\
+\
+            bubble.userData = \{\
+              velocity: new THREE.Vector3(\
+                (Math.random() - 0.5) * 0.02,\
+                0.05 + Math.random() * 0.03,\
+                (Math.random() - 0.5) * 0.02\
+              ),\
+              life: 0\
+            \};\
+\
+            this.scene.add(bubble);\
+            emitter.bubbles.push(bubble);\
+          \}\
+\
+          for (let i = emitter.bubbles.length - 1; i >= 0; i--) \{\
+            const bubble = emitter.bubbles[i];\
+            bubble.position.add(bubble.userData.velocity);\
+            bubble.userData.life += delta;\
+\
+            if (bubble.position.y > 6 || bubble.userData.life > 5) \{\
+              this.scene.remove(bubble);\
+              emitter.bubbles.splice(i, 1);\
+            \}\
+          \}\
+        \});\
+      \}\
+\
+      dropFood(position) \{\
+        const geometry = new THREE.SphereGeometry(0.15, 8, 8);\
+        const material = new THREE.MeshBasicMaterial(\{ color: 0xffaa00 \});\
+        const food = new THREE.Mesh(geometry, material);\
+        food.position.copy(position);\
+        this.scene.add(food);\
+        this.foods.push(\{ mesh: food, velocity: new THREE.Vector3(0, -0.05, 0) \});\
+      \}\
+\
+      clearScene() \{\
+        this.fishList.forEach(f => this.scene.remove(f.mesh));\
+        this.jellyfishList.forEach(j => this.scene.remove(j.mesh));\
+        this.decorations.forEach(d => this.scene.remove(d));\
+        this.corals.forEach(c => this.scene.remove(c));\
+        this.divers.forEach(d => this.scene.remove(d.mesh));\
+        this.foods.forEach(f => this.scene.remove(f.mesh));\
+\
+        this.bubbleEmitters.forEach(emitter => \{\
+          emitter.bubbles.forEach(b => this.scene.remove(b));\
+        \});\
+\
+        this.fishList = [];\
+        this.jellyfishList = [];\
+        this.decorations = [];\
+        this.corals = [];\
+        this.divers = [];\
+        this.foods = [];\
+        this.bubbleEmitters = [];\
+      \}\
+\
+      resetCamera() \{\
+        this.camera.position.set(0, 5, 20);\
+        this.camera.lookAt(0, 0, 0);\
+      \}\
+\
+      onPointerDown(event) \{\
+        event.preventDefault();\
+        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;\
+        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;\
+        this.raycaster.setFromCamera(this.mouse, this.camera);\
+\
+        const target = new THREE.Vector3();\
+        this.raycaster.ray.at(10, target);\
+        target.y = Math.max(target.y, 4);\
+        target.z = Math.max(Math.min(target.z, 5), -5);\
+\
+        this.dropFood(target);\
+      \}\
+\
+      onWindowResize() \{\
+        this.camera.aspect = window.innerWidth / window.innerHeight;\
+        this.camera.updateProjectionMatrix();\
+        this.renderer.setSize(window.innerWidth, window.innerHeight);\
+      \}\
+\
+      animate() \{\
+        requestAnimationFrame(() => this.animate());\
+\
+        const time = this.clock.getElapsedTime();\
+        const delta = this.clock.getDelta();\
+\
+        this.fishList.forEach(fish => \{\
+          fish.update(this.fishList, this.foods, \{\
+            ...this.boidConfig,\
+            bounds: \{ x: 14, y: 7, z: 10 \},\
+            time: time\
+          \});\
+        \});\
+\
+        this.jellyfishList.forEach(jelly => \{\
+          jelly.update(time, delta);\
+        \});\
+\
+        this.divers.forEach(diver => \{\
+          diver.update(time);\
+        \});\
+\
+        this.decorations.forEach(deco => \{\
+          if (deco.userData.type === 'seaweed') \{\
+            const sway = Math.sin(time * deco.userData.speed + deco.userData.phase) * 0.15;\
+            deco.rotation.z = sway;\
+            deco.rotation.x = sway * 0.5;\
+          \} else if (deco.userData.type === 'chest') \{\
+            const bounce = Math.sin(time * 2 + deco.userData.phase) * 0.1;\
+            deco.userData.lid.position.y = deco.userData.initialLidY + bounce;\
+          \}\
+        \});\
+\
+        this.corals.forEach(coral => \{\
+          const sway = Math.sin(time * coral.userData.speed + coral.userData.phase) * 0.05;\
+          coral.rotation.y = sway;\
+          coral.children.forEach((child, i) => \{\
+            child.rotation.z = Math.sin(time * 1.5 + i) * 0.1;\
+          \});\
+        \});\
+\
+        for (let i = this.foods.length - 1; i >= 0; i--) \{\
+          const food = this.foods[i];\
+          food.mesh.position.add(food.velocity);\
+          if (food.mesh.position.y < -5) \{\
+            this.scene.remove(food.mesh);\
+            this.foods.splice(i, 1);\
+          \}\
+        \}\
+\
+        this.updateBubbles(delta);\
+\
+        const positions = this.particles.geometry.attributes.position.array;\
+        for (let i = 1; i < positions.length; i += 3) \{\
+          positions[i] -= 0.015;\
+          if (positions[i] < -5) positions[i] = 10;\
+        \}\
+        this.particles.geometry.attributes.position.needsUpdate = true;\
+\
+        this.renderer.render(this.scene, this.camera);\
+      \}\
+    \}\
+\
+    class EnhancedFish \{\
+      constructor(type) \{\
+        this.type = type;\
+        this.mesh = this.createDetailedMesh(type);\
+        this.velocity = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);\
+        this.acceleration = new THREE.Vector3();\
+        this.maxSpeed = type === 'neon' ? 0.15 : 0.12;\
+        this.maxForce = 0.006;\
+\
+        this.tailRef = null;\
+        this.dorsalFinRef = null;\
+        this.pectoralFins = [];\
+      \}\
+\
+      createDetailedMesh(type) \{\
+        const group = new THREE.Group();\
+\
+        const isNeon = type === 'neon';\
+        const bodyColor = isNeon ? 0x00ffff : 0xff8800;\
+        const accentColor = isNeon ? 0xff0055 : 0xffdd00;\
+\
+        const bodyGeom = new THREE.SphereGeometry(0.25, 8, 8);\
+        bodyGeom.scale(1, 0.8, 1.6);\
+        const bodyMat = new THREE.MeshStandardMaterial(\{\
+          color: bodyColor,\
+          roughness: 0.3,\
+          metalness: 0.4,\
+          emissive: bodyColor,\
+          emissiveIntensity: 0.2\
+        \});\
+        const body = new THREE.Mesh(bodyGeom, bodyMat);\
+        group.add(body);\
+\
+        const eyeGeom = new THREE.SphereGeometry(0.06, 6, 6);\
+        const eyeMat = new THREE.MeshBasicMaterial(\{ color: 0x000000 \});\
+\
+        const eye1 = new THREE.Mesh(eyeGeom, eyeMat);\
+        eye1.position.set(0.15, 0.1, 0.25);\
+        group.add(eye1);\
+\
+        const eye2 = new THREE.Mesh(eyeGeom, eyeMat);\
+        eye2.position.set(-0.15, 0.1, 0.25);\
+        group.add(eye2);\
+\
+        const highlightGeom = new THREE.SphereGeometry(0.03, 4, 4);\
+        const highlightMat = new THREE.MeshBasicMaterial(\{ color: 0xffffff \});\
+\
+        const highlight1 = new THREE.Mesh(highlightGeom, highlightMat);\
+        highlight1.position.set(0.17, 0.12, 0.27);\
+        group.add(highlight1);\
+\
+        const highlight2 = highlight1.clone();\
+        highlight2.position.set(-0.17, 0.12, 0.27);\
+        group.add(highlight2);\
+\
+        const tailGeom = new THREE.ConeGeometry(0.2, 0.5, 3);\
+        tailGeom.rotateX(-Math.PI / 2);\
+        const tailMat = new THREE.MeshStandardMaterial(\{\
+          color: accentColor,\
+          roughness: 0.4,\
+          transparent: true,\
+          opacity: 0.9\
+        \});\
+        const tail = new THREE.Mesh(tailGeom, tailMat);\
+        tail.position.z = -0.55;\
+        this.tailRef = tail;\
+        group.add(tail);\
+\
+        const dorsalGeom = new THREE.ConeGeometry(0.15, 0.35, 3);\
+        dorsalGeom.rotateZ(-Math.PI / 2);\
+        const dorsalMat = new THREE.MeshStandardMaterial(\{\
+          color: accentColor,\
+          roughness: 0.5,\
+          transparent: true,\
+          opacity: 0.8\
+        \});\
+        const dorsalFin = new THREE.Mesh(dorsalGeom, dorsalMat);\
+        dorsalFin.position.set(0, 0.25, -0.1);\
+        this.dorsalFinRef = dorsalFin;\
+        group.add(dorsalFin);\
+\
+        const pectoralGeom = new THREE.ConeGeometry(0.1, 0.25, 3);\
+        pectoralGeom.rotateZ(Math.PI / 2);\
+        const pectoralMat = new THREE.MeshStandardMaterial(\{\
+          color: bodyColor,\
+          roughness: 0.5,\
+          transparent: true,\
+          opacity: 0.7\
+        \});\
+\
+        const pectoralLeft = new THREE.Mesh(pectoralGeom, pectoralMat);\
+        pectoralLeft.position.set(-0.25, -0.05, 0.1);\
+        pectoralLeft.rotation.y = -0.3;\
+        this.pectoralFins.push(pectoralLeft);\
+        group.add(pectoralLeft);\
+\
+        const pectoralRight = new THREE.Mesh(pectoralGeom, pectoralMat);\
+        pectoralRight.position.set(0.25, -0.05, 0.1);\
+        pectoralRight.rotation.y = 0.3;\
+        this.pectoralFins.push(pectoralRight);\
+        group.add(pectoralRight);\
+\
+        if (isNeon) \{\
+          const stripeGeom = new THREE.PlaneGeometry(0.5, 0.08);\
+          const stripeMat = new THREE.MeshBasicMaterial(\{\
+            color: 0xff0055,\
+            transparent: true,\
+            opacity: 0.8\
+          \});\
+          const stripe = new THREE.Mesh(stripeGeom, stripeMat);\
+          stripe.position.set(0, 0, 0.26);\
+          group.add(stripe);\
+        \}\
+\
+        group.castShadow = true;\
+        return group;\
+      \}\
+\
+      update(boids, foods, config) \{\
+        this.flock(boids, foods, config);\
+\
+        this.velocity.add(this.acceleration);\
+        this.velocity.clampLength(0, this.maxSpeed);\
+        this.mesh.position.add(this.velocity);\
+        this.acceleration.multiplyScalar(0);\
+\
+        if (this.velocity.length() > 0.001) \{\
+          const targetQuaternion = new THREE.Quaternion();\
+          const m = new THREE.Matrix4();\
+          m.lookAt(this.velocity, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0));\
+          targetQuaternion.setFromRotationMatrix(m);\
+          this.mesh.quaternion.slerp(targetQuaternion, 0.1);\
+        \}\
+\
+        const speed = this.velocity.length();\
+        const swimSpeed = 15 + speed * 50;\
+\
+        if (this.tailRef) this.tailRef.rotation.y = Math.sin(config.time * swimSpeed) * 0.5;\
+        if (this.dorsalFinRef) this.dorsalFinRef.rotation.z = -Math.PI / 2 + Math.sin(config.time * swimSpeed * 0.5) * 0.2;\
+\
+        this.pectoralFins.forEach((fin, i) => \{\
+          const phase = i * Math.PI;\
+          fin.rotation.x = Math.sin(config.time * swimSpeed + phase) * 0.3;\
+        \});\
+      \}\
+\
+      flock(boids, foods, config) \{\
+        const perceptionRadius = config.perception;\
+        const avgPos = new THREE.Vector3();\
+        const avgVel = new THREE.Vector3();\
+        const diffPos = new THREE.Vector3();\
+        let total = 0;\
+\
+        for (const other of boids) \{\
+          const d = this.mesh.position.distanceTo(other.mesh.position);\
+          if (other !== this && d < perceptionRadius) \{\
+            avgPos.add(other.mesh.position);\
+            avgVel.add(other.velocity);\
+\
+            const diff = new THREE.Vector3().subVectors(this.mesh.position, other.mesh.position);\
+            diff.divideScalar(d * d);\
+            diffPos.add(diff);\
+            total++;\
+          \}\
+        \}\
+\
+        if (total > 0) \{\
+          avgPos.divideScalar(total);\
+          avgPos.sub(this.mesh.position);\
+          avgPos.setLength(this.maxSpeed);\
+          avgPos.sub(this.velocity);\
+          avgPos.clampLength(0, this.maxForce);\
+          avgPos.multiplyScalar(config.cohesion);\
+          this.acceleration.add(avgPos);\
+\
+          avgVel.divideScalar(total);\
+          avgVel.setLength(this.maxSpeed);\
+          avgVel.sub(this.velocity);\
+          avgVel.clampLength(0, this.maxForce);\
+          avgVel.multiplyScalar(config.alignment);\
+          this.acceleration.add(avgVel);\
+\
+          diffPos.divideScalar(total);\
+          diffPos.setLength(this.maxSpeed);\
+          diffPos.sub(this.velocity);\
+          diffPos.clampLength(0, this.maxForce);\
+          diffPos.multiplyScalar(config.separation * 1.5);\
+          this.acceleration.add(diffPos);\
+        \}\
+\
+        if (foods.length > 0) \{\
+          let closestFood = null;\
+          let closestDist = Infinity;\
+\
+          for (const food of foods) \{\
+            const d = this.mesh.position.distanceTo(food.mesh.position);\
+            if (d < closestDist) \{\
+              closestDist = d;\
+              closestFood = food;\
+            \}\
+          \}\
+\
+          if (closestFood && closestDist < 8) \{\
+            const seek = new THREE.Vector3().subVectors(closestFood.mesh.position, this.mesh.position);\
+            seek.setLength(this.maxSpeed);\
+            seek.sub(this.velocity);\
+            seek.clampLength(0, this.maxForce * 2.5);\
+            this.acceleration.add(seek);\
+          \}\
+        \}\
+\
+        const turnFactor = 0.003;\
+        const b = config.bounds;\
+\
+        if (this.mesh.position.x < -b.x) this.velocity.x += turnFactor;\
+        if (this.mesh.position.x > b.x) this.velocity.x -= turnFactor;\
+        if (this.mesh.position.y < -4) this.velocity.y += turnFactor;\
+        if (this.mesh.position.y > 5) this.velocity.y -= turnFactor;\
+        if (this.mesh.position.z < -b.z) this.velocity.z += turnFactor;\
+        if (this.mesh.position.z > b.z) this.velocity.z -= turnFactor;\
+      \}\
+    \}\
+\
+    class Jellyfish \{\
+      constructor() \{\
+        this.mesh = this.createMesh();\
+        this.velocity = new THREE.Vector3(0, 0.02, 0);\
+        this.phase = Math.random() * Math.PI * 2;\
+        this.tentacles = [];\
+      \}\
+\
+      createMesh() \{\
+        const group = new THREE.Group();\
+\
+        const bodyGeom = new THREE.SphereGeometry(0.3, 8, 8);\
+        bodyGeom.scale(1, 0.5, 1);\
+        const bodyMat = new THREE.MeshStandardMaterial(\{\
+          color: 0xff69b4,\
+          transparent: true,\
+          opacity: 0.7,\
+          emissive: 0xff69b4,\
+          emissiveIntensity: 0.3\
+        \});\
+        const body = new THREE.Mesh(bodyGeom, bodyMat);\
+        group.add(body);\
+\
+        const tentacleCount = 8;\
+        for (let i = 0; i < tentacleCount; i++) \{\
+          const angle = (i / tentacleCount) * Math.PI * 2;\
+          const length = 0.8 + Math.random() * 0.4;\
+\
+          const tentacleGeom = new THREE.CylinderGeometry(0.02, 0.01, length, 4);\
+          const tentacleMat = new THREE.MeshStandardMaterial(\{\
+            color: 0xffb6c1,\
+            transparent: true,\
+            opacity: 0.6\
+          \});\
+          const tentacle = new THREE.Mesh(tentacleGeom, tentacleMat);\
+\
+          tentacle.position.x = Math.cos(angle) * 0.2;\
+          tentacle.position.z = Math.sin(angle) * 0.2;\
+          tentacle.position.y = -length / 2;\
+\
+          tentacle.userData = \{\
+            angle: angle,\
+            length: length,\
+            phase: Math.random() * Math.PI * 2\
+          \};\
+\
+          this.tentacles.push(tentacle);\
+          group.add(tentacle);\
+        \}\
+\
+        group.castShadow = true;\
+        return group;\
+      \}\
+\
+      update(time, delta) \{\
+        const pulse = Math.sin(time * 2 + this.phase) * 0.03;\
+        this.mesh.position.y += pulse;\
+\
+        this.mesh.position.x += Math.sin(time * 0.5 + this.phase) * 0.01;\
+        this.mesh.position.z += Math.cos(time * 0.5 + this.phase) * 0.01;\
+\
+        const scale = 1 + Math.sin(time * 3 + this.phase) * 0.1;\
+        this.mesh.children[0].scale.y = scale * 0.5;\
+\
+        this.tentacles.forEach((tentacle, i) => \{\
+          const wave = Math.sin(time * 3 + tentacle.userData.phase + i * 0.5) * 0.3;\
+          tentacle.rotation.x = wave;\
+          tentacle.rotation.z = Math.cos(time * 2 + i) * 0.2;\
+        \});\
+\
+        if (this.mesh.position.y > 5) this.mesh.position.y = 5;\
+        if (this.mesh.position.y < -2) this.mesh.position.y = -2;\
+        if (Math.abs(this.mesh.position.x) > 12) this.mesh.position.x *= 0.9;\
+        if (Math.abs(this.mesh.position.z) > 10) this.mesh.position.z *= 0.9;\
+      \}\
+    \}\
+\
+    class Diver \{\
+      constructor() \{\
+        this.mesh = this.createMesh();\
+        this.phase = Math.random() * Math.PI * 2;\
+        this.direction = new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize();\
+        this.speed = 0.02;\
+\
+        this.leftArm = null;\
+        this.rightArm = null;\
+        this.leftLeg = null;\
+        this.rightLeg = null;\
+      \}\
+\
+      createMesh() \{\
+        const group = new THREE.Group();\
+\
+        const headGeom = new THREE.SphereGeometry(0.25, 8, 8);\
+        const headMat = new THREE.MeshStandardMaterial(\{ color: 0xffd700 \});\
+        const head = new THREE.Mesh(headGeom, headMat);\
+        head.position.y = 0.6;\
+        group.add(head);\
+\
+        const visorGeom = new THREE.SphereGeometry(0.18, 8, 8);\
+        const visorMat = new THREE.MeshStandardMaterial(\{\
+          color: 0x87ceeb,\
+          transparent: true,\
+          opacity: 0.5,\
+          metalness: 0.8\
+        \});\
+        const visor = new THREE.Mesh(visorGeom, visorMat);\
+        visor.position.set(0, 0.6, 0.15);\
+        group.add(visor);\
+\
+        const bodyGeom = new THREE.CylinderGeometry(0.2, 0.25, 0.6, 8);\
+        const bodyMat = new THREE.MeshStandardMaterial(\{ color: 0xff6347 \});\
+        const body = new THREE.Mesh(bodyGeom, bodyMat);\
+        body.position.y = 0.15;\
+        group.add(body);\
+\
+        const tankGeom = new THREE.CylinderGeometry(0.12, 0.12, 0.5, 8);\
+        const tankMat = new THREE.MeshStandardMaterial(\{\
+          color: 0x666666,\
+          metalness: 0.7\
+        \});\
+        const tank = new THREE.Mesh(tankGeom, tankMat);\
+        tank.position.set(0, 0.3, -0.25);\
+        group.add(tank);\
+\
+        const armGeom = new THREE.CylinderGeometry(0.06, 0.06, 0.4, 6);\
+        const armMat = new THREE.MeshStandardMaterial(\{ color: 0xff6347 \});\
+\
+        const leftArm = new THREE.Mesh(armGeom, armMat);\
+        leftArm.position.set(-0.3, 0.2, 0);\
+        leftArm.rotation.z = 0.5;\
+        this.leftArm = leftArm;\
+        group.add(leftArm);\
+\
+        const rightArm = new THREE.Mesh(armGeom, armMat);\
+        rightArm.position.set(0.3, 0.2, 0);\
+        rightArm.rotation.z = -0.5;\
+        this.rightArm = rightArm;\
+        group.add(rightArm);\
+\
+        const legGeom = new THREE.CylinderGeometry(0.07, 0.07, 0.5, 6);\
+        const legMat = new THREE.MeshStandardMaterial(\{ color: 0x0000ff \});\
+\
+        const leftLeg = new THREE.Mesh(legGeom, legMat);\
+        leftLeg.position.set(-0.1, -0.35, 0);\
+        this.leftLeg = leftLeg;\
+        group.add(leftLeg);\
+\
+        const rightLeg = new THREE.Mesh(legGeom, legMat);\
+        rightLeg.position.set(0.1, -0.35, 0);\
+        this.rightLeg = rightLeg;\
+        group.add(rightLeg);\
+\
+        const flipperGeom = new THREE.BoxGeometry(0.15, 0.05, 0.25);\
+        const flipperMat = new THREE.MeshStandardMaterial(\{ color: 0x000000 \});\
+\
+        const flipperL = new THREE.Mesh(flipperGeom, flipperMat);\
+        flipperL.position.set(-0.1, -0.65, 0.05);\
+        group.add(flipperL);\
+\
+        const flipperR = new THREE.Mesh(flipperGeom, flipperMat);\
+        flipperR.position.set(0.1, -0.65, 0.05);\
+        group.add(flipperR);\
+\
+        group.castShadow = true;\
+        return group;\
+      \}\
+\
+      update(time) \{\
+        this.mesh.position.x += this.direction.x * this.speed;\
+        this.mesh.position.z += this.direction.z * this.speed;\
+\
+        if (Math.abs(this.mesh.position.x) > 10) this.direction.x *= -1;\
+        if (Math.abs(this.mesh.position.z) > 10) this.direction.z *= -1;\
+\
+        this.mesh.position.y += Math.sin(time * 2 + this.phase) * 0.005;\
+\
+        const angle = Math.atan2(this.direction.z, this.direction.x);\
+        this.mesh.rotation.y = -angle + Math.PI / 2;\
+\
+        if (this.leftArm) \{\
+          this.leftArm.rotation.z = 0.5 + Math.sin(time * 3 + this.phase) * 0.3;\
+          this.leftArm.rotation.x = Math.cos(time * 3) * 0.2;\
+        \}\
+        if (this.rightArm) \{\
+          this.rightArm.rotation.z = -0.5 - Math.sin(time * 3 + this.phase) * 0.3;\
+          this.rightArm.rotation.x = -Math.cos(time * 3) * 0.2;\
+        \}\
+        if (this.leftLeg) this.leftLeg.rotation.x = Math.sin(time * 2.5 + this.phase) * 0.3;\
+        if (this.rightLeg) this.rightLeg.rotation.x = Math.sin(time * 2.5 + this.phase + Math.PI) * 0.3;\
+      \}\
+    \}\
+\
+    let app;\
+    window.addEventListener('DOMContentLoaded', () => \{\
+      app = new AquaPure();\
+    \});\
+  </script>\
+</body>\
+</html>}
